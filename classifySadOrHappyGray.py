@@ -21,7 +21,7 @@ def transformImage(file):
     return picture
 
 
-def createDataSets(smilePath, nonSmilePath,batchSize):
+def createDataSets(smilePath, nonSmilePath):
     """Returns a dataset of pictures and a dataset of according labels as numpy arrays
      with the dimensions (images, widht, height, color) and (image, smiling/not smiling). """
 
@@ -30,27 +30,17 @@ def createDataSets(smilePath, nonSmilePath,batchSize):
 
     #transform all smiling pictures
     for root, dirs, files in os.walk(smilePath, True):
-        i=0
-        #static for loop
         for name in files:
-        #all images
-        #for name in files:
-            if name.endswith(".jpg") and i<(batchSize/2):
+            if name.endswith(".jpg"):
                 pictures.append(transformImage(os.path.join(root, name)))
                 labels.append(np.array([1], np.int32))
-                i=i+1
 
     # transform all non-smiling pictures
     for root, dirs, files in os.walk(nonSmilePath, True):
-        k=0
-        #all images
-        #for name in files:
-        #static for loop
         for name in files:
-            if name.endswith(".jpg") and k<(batchSize/2):
+            if name.endswith(".jpg"):
                 pictures.append(transformImage(os.path.join(root, name)))
                 labels.append(np.array([0], np.int32))
-                k=k+1
 
     return np.asarray(pictures), np.asarray(labels)
 
@@ -63,47 +53,15 @@ def createDataSets(smilePath, nonSmilePath,batchSize):
 #define the accuracy
 #train with an optimizer
 
-# def splitIntoTrainAndTestData(pictures,labels,testingSplit):
-#     """Splits our dataset into train an test set based on the testing split size in percent.
-#     If a testing split of 20 is chosen 20% are going to be test data and 80% training data."""
+def splitIntoTrainAndTestData(pictures,labels,testingSplit):
+    """Splits our dataset into train an test set based on the testing split size in percent.
+    If a testing split of 20 is chosen 20% are going to be test data and 80% training data."""
 
-#     trainingLabels = []
-#     global testingSet
-#     global trainingSet
-#     global testingLabels
-
-#     for i in range(pictures.shape[0]):
-#         if random.randint(1, 100) > testingSplit:
-#             trainingSet.append(pictures[i])
-#             trainingLabels.append(labels[i])
-#         else:
-#             testingSet.append(pictures[i])
-#             testingLabels.append(labels[i])
-#     trainingSet1 = np.asarray(trainingSet)
-
-#     trainingSet = trainingSet1
-#     trainingLabels = np.asarray(trainingLabels)
-
-#     testingSet = np.asarray(testingSet)
-#     testingLabels = np.asarray(testingLabels)
-
-#     #print trainingSet.shape
-#     #print trainingLabels.shape
-#     #print testingSet.shape
-#     #print testingLabels.shape
-#     return trainingSet,trainingLabels,testingSet,testingLabels
-
-#static range to test faster
-def splitIntoTrainAndTestData(pictures, labels, testingSplit):
- #   """Splits our dataset into train an test set based on the testing split size in percent.
- #   If a testing split of 20 is chosen 20% are going to be test data and 80% training data."""
-#
     trainingLabels = []
     global testingSet
     global trainingSet
     global testingLabels
-    #limit the pictures to the same range specified in CreateDataset
-    print range(pictures.shape[0])
+
     for i in range(pictures.shape[0]):
         if random.randint(1, 100) > testingSplit:
             trainingSet.append(pictures[i])
@@ -112,40 +70,28 @@ def splitIntoTrainAndTestData(pictures, labels, testingSplit):
             testingSet.append(pictures[i])
             testingLabels.append(labels[i])
     trainingSet1 = np.asarray(trainingSet)
-
+    
     trainingSet = trainingSet1
     trainingLabels = np.asarray(trainingLabels)
-
+    
     testingSet = np.asarray(testingSet)
     testingLabels = np.asarray(testingLabels)
 
-    # print trainingSet.shape
-    # print trainingLabels.shape
-    # print testingSet.shape
-    # print testingLabels.shape
-    return trainingSet, trainingLabels, testingSet, testingLabels
+    #print trainingSet.shape
+    #print trainingLabels.shape
+    #print testingSet.shape
+    #print testingLabels.shape
+    return trainingSet,trainingLabels,testingSet,testingLabels
 
 def tensorPart(trainingSet,tainingLabels, testingSet, testingLabels):
     #input X 320x240 RGB images
-    #height, width, RGB value http://stackoverflow.com/questions/38231013/tensorflow-model-evaluation-is-based-on-batch-size
-    #probably we have to change to a smaller size, so tensorflow can handle the data, think here is where the algorithm goes stuck
-    X = tf.placeholder(tf.float32, [None,320,240,3])
-    #input test
-    #imageTest= tf.cast(trainingSet,tf.float32)
-    #print imageTest
-    #Ximage=tf.reshape(imageTest,[-1,320,240,3])
-    #print Ximage
-    #this should be the input because 1 and 0 as labels, but this is not working. 
-    #Y_ = tf.placeholder(tf.float32, [None, 1])
-    #this one seems to work but I think this is wrong
-    #Y_ = tf.placeholder(tf.float32, [None,320,240,3]) #changed
-    #this one is for sure wrong
-    #Y_=  tf.placeholder(tf.float32, [None,(320*240*3)])
+    X = tf.placeholder(tf.float32, [None,320,240,1])
+    Y_ = tf.placeholder(tf.float32, [None, 1])
     pkeep = tf.placeholder(tf.float32)
     #weight 1
-    W1 = tf.Variable(tf.truncated_normal([5,5,3,8],stddev = 0.1))
+    W1 = tf.Variable(tf.truncated_normal([5,5,1,8],stddev = 0.1))
     #bias
-    B1=tf.Variable(tf.ones([8])/3)
+    B1=tf.Variable(tf.ones([8])/1)
     #conv layer 1
     Y1 = tf.nn.conv2d(X,W1, strides=[1,1,1,1], padding ='SAME')
     Y1Relu=tf.nn.relu(Y1+B1)
@@ -153,12 +99,12 @@ def tensorPart(trainingSet,tainingLabels, testingSet, testingLabels):
     pool1 = tf.nn.max_pool(Y1Relu, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1') #halve structure to 160x120
     print pool1
     #reshape
-    YY = tf.reshape(pool1, shape=[-1, 120 * 160 * 12]) #160*120 structure
+    YY = tf.reshape(pool1, shape=[-1, 160 * 120 * 12]) #160*120 structure
 
     #weight 2
     W2 = tf.Variable(tf.truncated_normal([160*120*12,1],stddev = 0.1))
     #bias
-    B2=tf.Variable(tf.ones([1])/3)
+    B2=tf.Variable(tf.ones([1])/1)
 
     #softmax
     Ylogits = tf.matmul(YY, W2) + B2
@@ -243,11 +189,7 @@ def training_step(i, update_test_data, update_train_data, sess, train_step, X, Y
     print "\r", i,
     ####### actual learning 
     # reading batches of 100 images with 100 labels
-    #batch_X = tf.train.batch(trainingSet,batch_size=100) #change smaller batch size
-
-    batch_X = trainingSet
-    print trainingSet
-    #batch_Y=tf.train.batch(testingSet,batch_size=100) 
+    batch_X = trainingSet 
     batch_Y = testingSet
     
     # adapt the learning rate
@@ -280,8 +222,7 @@ def training_step(i, update_test_data, update_train_data, sess, train_step, X, Y
     return (train_a, train_c, test_a, test_c)    
     
 def main(argv=None):
-    batchSize=300
-    pictures, labels = createDataSets("AMFED/AMFED/happiness/", "AMFED/AMFED/nonHapiness/",batchSize)
+    pictures, labels = createDataSets("AMFED/AMFED/happinessGray/", "AMFED/AMFED/nonHappinessGray/")
     #print pictures.shape
     #print labels.shape
     testingSplit = 20

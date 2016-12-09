@@ -139,7 +139,7 @@ def get_header_au(row):
     # print result
     return result
 
-def process_video_hapiness(csv_path, video_path, dest_path, suffix):
+def process_video_happiness(csv_path, video_path, dest_path, suffix):
     for root, dirs, files in os.walk(csv_path, True):
         for name in files:
             with open(os.path.join(root, name), 'rU') as csvfile:
@@ -204,8 +204,8 @@ def main(argv=None): # pylint: disable=unused-argument
     #process_video_hapiness(csv_path, video_path, dest_path, suffix)
     #destination path for sadness
     #dest_path = "AMFED/AMFED/sadness"
-    dest_path = "AMFED/AMFED/nonHapiness"
-    process_video_non_happiness(csv_path, video_path, dest_path, suffix)
+    dest_path = "AMFED/AMFED/happiness"
+    process_video_happiness(csv_path, video_path, dest_path, suffix)
 
 if __name__ == '__main__':
     main()
