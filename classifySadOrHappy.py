@@ -7,6 +7,7 @@ import random
 trainingSet = []
 testingSet = []
 testingLabels = []
+trainingLabels = []
 def transformImage(file):
     """Returns the transformed image as numpy array in the dimension (widht, length, color)"""
 
@@ -98,10 +99,10 @@ def splitIntoTrainAndTestData(pictures, labels, testingSplit):
  #   """Splits our dataset into train an test set based on the testing split size in percent.
  #   If a testing split of 20 is chosen 20% are going to be test data and 80% training data."""
 #
-    trainingLabels = []
     global testingSet
     global trainingSet
     global testingLabels
+    global trainingLabels
     #limit the pictures to the same range specified in CreateDataset
     print range(pictures.shape[0])
     for i in range(pictures.shape[0]):
@@ -136,7 +137,7 @@ def tensorPart(trainingSet,tainingLabels, testingSet, testingLabels):
     #Ximage=tf.reshape(imageTest,[-1,320,240,3])
     #print Ximage
     #this should be the input because 1 and 0 as labels, but this is not working. 
-    #Y_ = tf.placeholder(tf.float32, [None, 1])
+    Y_ = tf.placeholder(tf.float32, [None, 1])
     #this one seems to work but I think this is wrong
     #Y_ = tf.placeholder(tf.float32, [None,320,240,3]) #changed
     #this one is for sure wrong
@@ -247,8 +248,8 @@ def training_step(i, update_test_data, update_train_data, sess, train_step, X, Y
 
     batch_X = trainingSet
     print trainingSet
-    #batch_Y=tf.train.batch(testingSet,batch_size=100) 
-    batch_Y = testingSet
+    #the Y_ refers to the labels, so put there the training lebls in. 
+    batch_Y = trainingLabels
     
     # adapt the learning rate
     decay_rate = 0.95
@@ -268,6 +269,7 @@ def training_step(i, update_test_data, update_train_data, sess, train_step, X, Y
     test_a = []
     test_c = []
     if update_train_data:
+    	#the Y_ refers to the label, so put there the traininglabels in
         a, c = sess.run([accuracy, cross_entropy], feed_dict={X: batch_X, Y_: batch_Y})
         train_a.append(a)
         train_c.append(c)

@@ -190,7 +190,7 @@ def training_step(i, update_test_data, update_train_data, sess, train_step, X, Y
     ####### actual learning 
     # reading batches of 100 images with 100 labels
     batch_X = trainingSet 
-    batch_Y = testingSet
+    batch_Y = trainingLabels
     
     # adapt the learning rate
     decay_rate = 0.95
