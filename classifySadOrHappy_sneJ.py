@@ -72,10 +72,10 @@ def splitIntoTrainAndTestData(pictures,labels,testingSplit):
              testingSet.append(pictures[i])
              testingLabels.append(labels[i])
 
-     return np.asanyarray(trainingSet),np.asarray(trainingLabels),np.asarray(testingSet),np.asarray(testingLabels)
+     return trainingSet,trainingLabels,testingSet,testingLabels
 
 
-def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels):
+def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
     X = tf.placeholder(tf.float32, [None, 320, 240, 3])
     Y_ = tf.placeholder(tf.float32, [None, 2])
 
@@ -116,11 +116,16 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels):
     train_c = []
     test_a = []
     test_c = []
-    batchSize = 25
 
-    for step in range(0,trainingSet.shape[0],batchSize):
-        batch_X = trainingSet #TODO use batches
-        batch_Y = trainingLabels #TODO use batches
+    for step in range(0,len(trainingSet),batchSize):
+        batchBegin = step
+        batchEnd = step+batchSize
+        if batchEnd > len(trainingSet):
+            batchEnd = len(trainingSet)
+
+        batch_X = np.asarray(trainingSet[batchBegin:batchEnd])
+        batch_Y = np.asarray(trainingLabels[batchBegin:batchEnd])
+
         sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y})
         a, c = sess.run([accuracy, cross_entropy], feed_dict={X: batch_X, Y_: batch_Y})
         train_a.append(a)
@@ -133,18 +138,16 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels):
 
 
 def main(argv=None):
-    dataSetSize=100
+    dataSetSize=200
     pictures, labels = createDataSets("AMFED/AMFED/happiness/", "AMFED/AMFED/nonHapiness/",dataSetSize)
     print pictures.shape
     print labels.shape
     testingSplit = 20
     trainingSet, trainingLabels, testingSet, testingLabels = splitIntoTrainAndTestData(pictures,labels,testingSplit)
-    print trainingSet.shape
-    print trainingLabels.shape
-    print testingSet.shape
-    print testingLabels.shape
-
-    train_a, train_c, test_a, test_c = tensorPart(trainingSet,trainingLabels,testingSet,testingLabels)
+    print len(trainingSet), len(trainingLabels)
+    print len(testingSet), len(testingLabels)
+    batchSize = 25
+    train_a, train_c, test_a, test_c = tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize)
     print "Training and Testing - Accurracy, Cross Entropy:"
     print train_a, train_c
     print test_a, test_c
