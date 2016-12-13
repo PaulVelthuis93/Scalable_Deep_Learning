@@ -39,7 +39,7 @@ def createDataSets(smilePath, nonSmilePath, dataSetSize):
         #for name in files:
             if name.endswith(".jpg") and i<(dataSetSize/2):
                 pictures.append(transformImage(os.path.join(root, name)))
-                labels.append(np.array([1], np.int32))
+                labels.append(np.array([1,0], np.int32))
                 i=i+1
 
     # transform all non-smiling pictures
@@ -51,7 +51,7 @@ def createDataSets(smilePath, nonSmilePath, dataSetSize):
         for name in files:
             if name.endswith(".jpg") and k<(dataSetSize/2):
                 pictures.append(transformImage(os.path.join(root, name)))
-                labels.append(np.array([0], np.int32))
+                labels.append(np.array([0,1], np.int32))
                 k=k+1
 
     return np.asarray(pictures), np.asarray(labels)
@@ -77,7 +77,7 @@ def splitIntoTrainAndTestData(pictures,labels,testingSplit):
 
 def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels):
     X = tf.placeholder(tf.float32, [None, 320, 240, 3])
-    Y_ = tf.placeholder(tf.float32, [None, 1])
+    Y_ = tf.placeholder(tf.float32, [None, 2])
 
     # weight 1
     W1 = tf.Variable(tf.truncated_normal([5, 5, 3, 12], stddev=0.1))
@@ -93,9 +93,9 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels):
     YY = tf.reshape(pool1, shape=[-1, 120 * 160 * 12])  # 160*120 structure
 
     # weight 2
-    W2 = tf.Variable(tf.truncated_normal([160 * 120 * 12, 1], stddev=0.1))
+    W2 = tf.Variable(tf.truncated_normal([160 * 120 * 12, 2], stddev=0.1))
     # bias
-    B2 = tf.Variable(tf.ones([1]) / 3)
+    B2 = tf.Variable(tf.ones([2]) / 3)
 
     # softmax
     Ylogits = tf.matmul(YY, W2) + B2
