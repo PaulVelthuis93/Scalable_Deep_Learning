@@ -54,11 +54,15 @@ def createDataSets(smilePath, nonSmilePath, dataSetSize, testingSplit):
         for name in files:
             if name.endswith(".jpg") and (k<(dataSetSize/2) or dataSetSize == -1):
                 if random.randint(1, 100) > testingSplit:
-                    trainingSet.append(transformImage(os.path.join(root, name)))
-                    trainingLabels.append(np.array([0, 1], np.int32))
+                    # insert to a random position to avoid overfitting
+                    insertPosition = random.randint(0, len(trainingLabels))
+                    trainingSet.insert(insertPosition, transformImage(os.path.join(root, name)))
+                    trainingLabels.insert(insertPosition, np.array([0, 1], np.int32))
                 else:
-                    testingSet.append(transformImage(os.path.join(root, name)))
-                    testingLabels.append(np.array([0, 1], np.int32))
+                    # insert to a random position to avoid overfitting
+                    insertPosition = random.randint(0, len(trainingLabels))
+                    testingSet.insert(insertPosition, transformImage(os.path.join(root, name)))
+                    testingLabels.insert(insertPosition, np.array([0, 1], np.int32))
                 k=k+1
 
     return trainingSet,trainingLabels,testingSet,testingLabels
@@ -155,8 +159,8 @@ def plotResults(train_a, test_a, train_c, test_c):
 
 
 def main(argv=None):
-    dataSetSize=750 # use -1 for all images
-    testingSplit = 20
+    dataSetSize = 750 # use -1 for all images
+    testingSplit = 20 # in % of total data-set size
     batchSize = 25
     trainingSet, trainingLabels, testingSet, testingLabels = createDataSets("AMFED/AMFED/happiness/","AMFED/AMFED/nonHapiness/",dataSetSize,testingSplit)
     #batchSize = len(testingSet) #to train in batches of the testing set size
