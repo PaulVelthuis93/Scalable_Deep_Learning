@@ -71,6 +71,8 @@ def createDataSets(smilePath, nonSmilePath, dataSetSize, testingSplit):
 def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
     X = tf.placeholder(tf.float32, [None, 320, 240, 3])
     Y_ = tf.placeholder(tf.float32, [None, 2])
+    learning_rate = tf.placeholder(tf.float32)
+    keep_prob = tf.placeholder(tf.float32)  # dropout (keep probability)
 
     # weight 1
     W1 = tf.Variable(tf.truncated_normal([5, 5, 3, 12], stddev=0.1))
@@ -84,6 +86,8 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
 
     # reshape
     YY = tf.reshape(pool1, shape=[-1, 120 * 160 * 12])  # 160*120 structure
+    # Apply Dropout
+    YY = tf.nn.dropout(YY, keep_prob)
 
     # weight 2
     W2 = tf.Variable(tf.truncated_normal([160 * 120 * 12, 2], stddev=0.1))
@@ -98,7 +102,6 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
     # accuracy of the trained model, between 0 (worst) and 1 (best)
     correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    learning_rate = tf.placeholder(tf.float32)
     train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 
     init = tf.global_variables_initializer()
@@ -110,6 +113,9 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
     decay_rate = 0.95
     decay_steps = 500
     stepCounter = 0
+
+    # set dropout keep probability
+    dropout = 0.80
 
     # sets to plot
     train_a = []
@@ -136,11 +142,11 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
         batch_Y = np.asarray(trainingLabels[batchBegin:batchEnd])
 
         # train
-        sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y, learning_rate:lr})
-        a, c = sess.run([accuracy, cross_entropy], feed_dict={X: batch_X, Y_: batch_Y})
+        sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y, learning_rate:lr, keep_prob:dropout})
+        a, c = sess.run([accuracy, cross_entropy], feed_dict={X: batch_X, Y_: batch_Y, keep_prob:1.0})
         train_a.append(a)
         train_c.append(c)
-        a, c = sess.run([accuracy, cross_entropy], feed_dict={X: testingSet, Y_: testingLabels})
+        a, c = sess.run([accuracy, cross_entropy], feed_dict={X: testingSet, Y_: testingLabels, keep_prob:1.0})
         test_a.append(a)
         test_c.append(c)
 
