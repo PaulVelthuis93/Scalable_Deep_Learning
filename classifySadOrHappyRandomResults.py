@@ -98,12 +98,18 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
     # accuracy of the trained model, between 0 (worst) and 1 (best)
     correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    learning_rate = 0.0005
+    learning_rate = tf.placeholder(tf.float32)
     train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 
     init = tf.global_variables_initializer()
     sess = tf.Session()
     sess.run(init)
+
+    # set learning rate and learning rate decay
+    initial_learning_rate = 0.0005
+    decay_rate = 0.95
+    decay_steps = 500
+    stepCounter = 0
 
     # sets to plot
     train_a = []
@@ -113,6 +119,13 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
 
     # train the model in batches
     for step in range(0,len(trainingSet),batchSize):
+
+        #reduce the learning rate
+        if stepCounter > decay_steps:
+            lr = initial_learning_rate * decay_rate ** (int(stepCounter / decay_steps))
+        else:
+            lr = initial_learning_rate
+
         # use the next batch
         batchBegin = step
         batchEnd = step+batchSize
@@ -123,13 +136,15 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
         batch_Y = np.asarray(trainingLabels[batchBegin:batchEnd])
 
         # train
-        sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y})
+        sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y, learning_rate:lr})
         a, c = sess.run([accuracy, cross_entropy], feed_dict={X: batch_X, Y_: batch_Y})
         train_a.append(a)
         train_c.append(c)
         a, c = sess.run([accuracy, cross_entropy], feed_dict={X: testingSet, Y_: testingLabels})
         test_a.append(a)
         test_c.append(c)
+
+        stepCounter += 1
 
     return train_a, train_c, test_a, test_c
 
