@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import csv
-import cv2
-import os
+import csv #to read csv files
+import cv2 #to generate images from the video
+import os #to get file paths
 #adapted from github: https://github.com/dllatas/deepLearning/blob/master/helper/generate_frame_from_video.py
 """
 1 (e) Angry
@@ -18,9 +18,21 @@ SURPRISE AND FEAR GG
 """
 
 def change_to_video_name(csv_name, suffix):
+    """
+    The name of the csv and the video is the same, only the suffix is diffferent.
+    With this function we get the video name with the flv suffix
+    params: name of csv file and the suffix (like flv)
+    """
     return csv_name[:-10]+"."+suffix
 
+
 def generate_frame(video_path, video_name, second, label, dest_path):
+    """
+    Generate Frame is used to generate the frame from a video. The frame is taken from a specific moment in time.
+    We safe the image in the format: video-name_second_label.jpg 
+    In this format we can see from which video the image was, at what moment it was taken, and what the label was, for example whether a person is happy or not.
+    Params used: the path to the video, the video name, the second on which the image should be taken, the label and the destination folder
+    """
     print "video_path", video_path
     print 'video_name',video_name
     print 'second',second
@@ -61,10 +73,14 @@ def check_contempt(content):
         for h in contempt:
             if c[0] == h and c[1] >= baseline:
                 return emotion_time, label
-"""
-Use this function to check for which time a person is happy and store the time and happy label
-"""
+
 def check_happiness(content):
+    """
+    The check_hapiness function is used to check for which time a person is happy and store the time and happy label
+    The information to see whether a person is extracted from the csv file. If the identification of the smile a person has is above a certain threshold the
+    label and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For hapiness we use label five
+    Params: the content of the row in the csv file
+    """
     baseline = 100
     happiness = ["Smile"]
     label = 5
@@ -77,10 +93,14 @@ def check_happiness(content):
             if c[0] == h and c[1] >= baseline:
                 print 'emotion & label',emotion_time, label
                 return emotion_time, label
-"""
-Use this function to check for which time a person is happy and store the time and happy label
-"""
+
 def check_happiness(content):
+    """
+    The check_hapiness function is used to check for which time a person is happy and store the time and happy label
+    The information to see whether a person is extracted from the csv file. If the identification of the smile a person has is above a certain threshold the
+    label and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For hapiness we use label five
+    Params: the content of the row in the csv file
+    """
     baseline = 50
     happiness = ["Smile"]
     label = 5
@@ -95,6 +115,12 @@ def check_happiness(content):
                 return emotion_time, label
 
 def check_nonHappiness(content):
+    """
+    The check_nonHapiness function is used to see if a person is not happy.
+    A person is not happy, when there is no smile and the AU12 baseline is less than 20
+    For the nonHapiness we use the label 50
+    Params: the content of the row in the csv file
+    """
     baseline = 0
     happiness = ["Smile"]
     AU12baseline = 20
@@ -112,6 +138,8 @@ def check_nonHappiness(content):
 
 def get_content(header, row):
     """
+    The get_content function returns the content of the csv file on the specific row
+    Params, the header to append the data to, the row number for which the content is wanted. 
     return: time frames for each AU in video
     """
     # print 'row',row
@@ -124,6 +152,9 @@ def get_content(header, row):
     return result
 
 def get_header_au(row):
+    """
+    
+    """
     rules = ["Time", "Smile", "AU"]
     #header = row[0:2]
     header=row
