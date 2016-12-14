@@ -4,6 +4,8 @@ import numpy as np
 import os
 from PIL import Image
 import random
+import matplotlib
+matplotlib.use('Agg') #To use matplotlib in headless mode
 import matplotlib.pyplot as plt
 
 def transformImage(file):
@@ -23,14 +25,16 @@ def transformImage(file):
 def createDataSets(smilePath, nonSmilePath, dataSetSize, testingSplit):
     """Createts the training and test datasets from the images in smilePath and nonSmilePath.
      The split is set based on the testing split size in percent.
-     If a testing split of 20 is chosen 20% are going to be test data and 80% training data."""
+     If a testing split of 20 is chosen 20% are going to be test data and 80% training data.
+
+     Only the file names of the training images are provided to reduce memory consumption."""
 
     trainingLabels = []
-    trainingSet = []
+    trainingSetFiles = []
     testingLabels = []
     testingSet = []
 
-    #transform all smiling pictures
+    # transform all smiling pictures
     for root, dirs, files in os.walk(smilePath, True):
         i=0
         #static for loop
@@ -39,7 +43,7 @@ def createDataSets(smilePath, nonSmilePath, dataSetSize, testingSplit):
         #for name in files:
             if name.endswith(".jpg") and (i<(dataSetSize/2) or dataSetSize == -1):
                 if random.randint(1, 100) > testingSplit:
-                    trainingSet.append(transformImage(os.path.join(root, name)))
+                    trainingSetFiles.append(os.path.join(root, name))
                     trainingLabels.append(np.array([1,0], np.int32))
                 else:
                     testingSet.append(transformImage(os.path.join(root, name)))
@@ -57,7 +61,7 @@ def createDataSets(smilePath, nonSmilePath, dataSetSize, testingSplit):
                 if random.randint(1, 100) > testingSplit:
                     # insert to a random position to avoid overfitting
                     insertPosition = random.randint(0, len(trainingLabels))
-                    trainingSet.insert(insertPosition, transformImage(os.path.join(root, name)))
+                    trainingSetFiles.insert(insertPosition, os.path.join(root, name))
                     trainingLabels.insert(insertPosition, np.array([0, 1], np.int32))
                 else:
                     # insert to a random position to avoid overfitting
@@ -66,10 +70,11 @@ def createDataSets(smilePath, nonSmilePath, dataSetSize, testingSplit):
                     testingLabels.insert(insertPosition, np.array([0, 1], np.int32))
                 k=k+1
 
-    return trainingSet,trainingLabels,testingSet,testingLabels
+    return trainingSetFiles,trainingLabels,testingSet,testingLabels
 
 
 def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
+    """The actual tensorflow learning process"""
     X = tf.placeholder(tf.float32, [None, 320, 240, 3])
     Y_ = tf.placeholder(tf.float32, [None, 2])
     learning_rate = tf.placeholder(tf.float32)
@@ -139,7 +144,12 @@ def tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize):
         if batchEnd > len(trainingSet):
             batchEnd = len(trainingSet)
 
-        batch_X = np.asarray(trainingSet[batchBegin:batchEnd])
+        # generate the next batch
+        nextBatch = []
+        for image in trainingSet[batchBegin:batchEnd]:
+            nextBatch.append(transformImage(image))
+        batch_X = np.asarray(nextBatch)
+        del nextBatch[:]
         batch_Y = np.asarray(trainingLabels[batchBegin:batchEnd])
 
         # train
@@ -184,11 +194,11 @@ def main(argv=None):
     dataSetSize = 750 # use -1 for all images
     testingSplit = 20 # in % of total data-set size
     batchSize = 25
-    trainingSet, trainingLabels, testingSet, testingLabels = createDataSets("AMFED/AMFED/happiness/","AMFED/AMFED/nonHapiness/",dataSetSize,testingSplit)
+    trainingSetFiles, trainingLabels, testingSet, testingLabels = createDataSets("AMFED/AMFED/happiness/","AMFED/AMFED/nonHappiness/",dataSetSize,testingSplit)
     #batchSize = len(testingSet) #to train in batches of the testing set size
-    print "size of training set:", len(trainingSet), len(trainingLabels)
+    print "size of training set:", len(trainingSetFiles), len(trainingLabels)
     print "size of testing set:", len(testingSet), len(testingLabels)
-    train_a, train_c, test_a, test_c = tensorPart(trainingSet,trainingLabels,testingSet,testingLabels,batchSize)
+    train_a, train_c, test_a, test_c = tensorPart(trainingSetFiles,trainingLabels,testingSet,testingLabels,batchSize)
     #print "Training and Testing - Accurracy, Cross Entropy:"
     #print train_a, train_c
     #print test_a, test_c
