@@ -7,7 +7,7 @@ These are then transformed into Numpy array dataSet with their labels accordingl
 After the testingSet and TrainingSet are created with their sets of labels as well, the TensorFlowModel is executed.
 In the tensorflow model the actual learning process starts to happen. 
 We have a placeholder for the numpy images and a placeholder for the labels.
-We use a convolutional layer, a max pooling layer and we use in the end Dropout. 
+We use a convolutional layer, a Relu, a max pooling layer and we use in the end Dropout. 
 Then we apply Softmax and cross entropy
 We use the adamOptimizer to learn with a certain learning rate and we minimize with the cross entropy
 Then we iterate in batches through the whole trainingset. Each batch get's trained and there is a test batch.
