@@ -54,11 +54,58 @@ def generate_frame(video_path, video_name, second, label, dest_path, td):
             cv2.imwrite(os.path.join(dest_path, video_name+"_"+str(second)+"_"+str(label)+".jpg"), image)
 
 def check_angry(content):
-    baseline = 50
+    baseline = 18
     #disgust = ["AU4", "AU15", "AU17"]
+    #sadness = ["AU2", "AU4", "AU15", "AU17"]
+    angry = ["AU4", "AU5", "AU15", "AU17"]
+    label = 12 # 159
+
+    # print 'content:',content
+    emotion_time = content[0][1]
+    emotion = []
+    for c in content:
+        for h in angry:
+            if c[0] == h:
+                emotion.append(c[1])
+    print emotion
+    #calculate if the average of all emotions found is above the baseline in %
+    factor = sum(emotion)/len(angry)
+    print 'factor',factor
+    print 'len angry',len(angry)
+    if factor>=baseline:
+        return emotion_time, label
+
+   
+            #if c[0] == h and c[1] >= baseline:
+            #    print 'emotion & label',emotion_time, label
+  
+def check_disgust(content):
+    
+    baseline = 25
+    disgust = ["AU4", "AU15", "AU17"] 
+    label = 13 # 159
+
+    # print 'content:',content
+    emotion_time = content[0][1]
+    emotion = []
+    for c in content:
+        for h in disgust:
+            if c[0] == h:
+                emotion.append(c[1])
+    print emotion
+    #calculate if the average of all emotions found is above the baseline in %
+    factor = sum(emotion)/len(disgust)
+    print 'factor',factor
+    print 'len disgust',len(disgust)
+    if factor>=baseline:
+        return emotion_time, label
+
+
+def check_sadness(content):
+    baseline = 18
     sadness = ["AU2", "AU4", "AU15", "AU17"]
-    #angry = ["AU4", "AU5", "AU15", "AU17"]
-    label = 1 # 159
+    
+    label = 14 # 159
 
     # print 'content:',content
     emotion_time = content[0][1]
@@ -68,23 +115,37 @@ def check_angry(content):
             if c[0] == h:
                 emotion.append(c[1])
     print emotion
+    #calculate if the average of all emotions found is above the baseline in %
     factor = sum(emotion)/len(sadness)
-    if factor >= baseline:
-        return emotion_time, label
+    print 'factor',factor
+    print 'len sadness',len(sadness)
+    if factor>=baseline:
+        return emotion_time, label 
+           
+
 
 def check_contempt(content):
-    baseline = 100
+    baseline = 50
     contempt = ["AU14"]
-    label = 2
+    label = 8
+    # print content
     emotion_time = content[0][1]
+    # print 'emotion_time',emotion_time
     for c in content:
         for h in contempt:
+            # print h
             if c[0] == h and c[1] >= baseline:
+                print 'emotion & label',emotion_time, label
                 return emotion_time, label
-"""
-Use this function to check for which time a person is happy and store the time and happy label
-"""
+
+
 def check_happiness(content):
+    """
+    The check_hapiness function is used to check for which time a person is happy and store the time and happy label
+    The information to see whether a person is extracted from the csv file. If the identification of the smile a person has is above a certain threshold the
+    label and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For hapiness we use label five
+    Params: the content of the row in the csv file
+    """
     baseline = 100
     happiness = ["Smile"]
     label = 5
@@ -97,10 +158,14 @@ def check_happiness(content):
             if c[0] == h and c[1] >= baseline:
                 print 'emotion & label',emotion_time, label
                 return emotion_time, label
-"""
-Use this function to check for which time a person is happy and store the time and happy label
-"""
+
 def check_happiness(content):
+    """
+    The check_hapiness function is used to check for which time a person is happy and store the time and happy label
+    The information to see whether a person is extracted from the csv file. If the identification of the smile a person has is above a certain threshold the
+    label and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For hapiness we use label five
+    Params: the content of the row in the csv file
+    """
     baseline = 50
     happiness = ["Smile"]
     label = 5
@@ -129,6 +194,8 @@ def check_nonHappiness(content):
             if c[0] == h and c[1] == baseline and content[12][1] <= AU12baseline and content[13][1] <= AU12baseline:
                 print 'emotion & label',emotion_time, label
                 return emotion_time, label
+
+
 
 def get_content(header, row):
     """
@@ -235,7 +302,45 @@ def process_video_non_happiness(csv_path, video_path, dest_path, suffix):
                                     generate_frame(video_path,
                                         change_to_video_name(name, suffix), emotion[0], emotion[1], dest_path,td) 
                                         
+def process_video(csv_path, video_path, dest_path, suffix):
+    for root, dirs, files in os.walk(csv_path, True):
+        for name in files:
+            with open(os.path.join(root, name), 'rU') as csvfile:
+                reader = csv.reader((line.replace('\0','') for line in csvfile), delimiter=',', quotechar='|')
+                for row in reader:
+                    # print row
+                    if reader.line_num == 1:
+                        header = get_header_au(row)
+                    
+                    else:
+                        # print 'h',header
+                        content = get_content(header, row)
+                        # if len(header) > 0:
 
+                        if len(header) > 0:
+                            if content:
+                                content = get_content(header, row)
+                                #emotion = check_angry(content)
+                                # print emotion
+                                emotion = check_contempt(content)
+                                #emotion = check_happiness(content)
+                                emotion_time1 = content[0][1]
+                                print 'emotion_time1',emotion_time1
+                                #get timewindow
+                                td = -1
+                                try:
+                                    if reader.next():
+                                        content2=get_content(header, reader.next())
+                                        emotion_time2 = content2[0][1]
+                                        td = emotion_time2 - emotion_time1
+                                        print 'td',td
+                                except:
+                                    pass
+                                if emotion is not None:
+                                    print emotion[0]
+                                    print emotion[1]
+                                    generate_frame(video_path,
+                                        change_to_video_name(name, suffix), emotion[0], emotion[1], dest_path,td) 
 
                                
 
@@ -248,8 +353,8 @@ def main(argv=None): # pylint: disable=unused-argument
     #process_video_hapiness(csv_path, video_path, dest_path, suffix)
     #destination path for sadness
     #dest_path = "AMFED/AMFED/sadness"
-    dest_path = "AMFED/AMFED/nonHappinessFourteenFramesPerSecond"
-    process_video_non_happiness(csv_path, video_path, dest_path, suffix)
+    dest_path = "AMFED/AMFED/contemptFourteenFramesPerSecond"
+    process_video(csv_path, video_path, dest_path, suffix)
 
 if __name__ == '__main__':
     main()

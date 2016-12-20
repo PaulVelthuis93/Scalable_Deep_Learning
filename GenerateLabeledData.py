@@ -61,7 +61,7 @@ def check_angry(content):
                 emotion.append(c[1])
     print emotion
     factor = sum(emotion)/len(sadness)
-    if factor >= baseline:
+    if factor >= (baseline/100):
         return emotion_time, label
 
 def check_contempt(content):
