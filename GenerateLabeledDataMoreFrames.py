@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import csv
-import cv2
-import os
+import csv #to read csv files
+import cv2 #to generate images from the video
+import os #to get file paths
 #adapted from github: https://github.com/dllatas/deepLearning/blob/master/helper/generate_frame_from_video.py
 """
 1 (e) Angry
@@ -18,9 +18,20 @@ SURPRISE AND FEAR GG
 """
 
 def change_to_video_name(csv_name, suffix):
+    """
+    The name of the csv and the video is the same, only the suffix is diffferent.
+    With this function we get the video name with the flv suffix
+    params: name of csv file and the suffix (like flv)
+    """
     return csv_name[:-10]+"."+suffix
 
 def generate_frame(video_path, video_name, second, label, dest_path, td):
+    """
+    Generate Frame is used to generate the frame from a video. The frame is taken from a specific moment in time.
+    We safe the image in the format: video-name_second_label.jpg 
+    In this format we can see from which video the image was, at what moment it was taken, and what the label was, for example whether a person is happy or not.
+    Params used: the path to the video, the video name, the second on which the image should be taken, the label and the destination folder
+    """
     print "video_path", video_path
     print 'video_name',video_name
     print 'second',second
@@ -54,6 +65,12 @@ def generate_frame(video_path, video_name, second, label, dest_path, td):
             cv2.imwrite(os.path.join(dest_path, video_name+"_"+str(second)+"_"+str(label)+".jpg"), image)
 
 def check_angry(content):
+     """
+    The check_angry function is used to check for which time a person is angry and store the time and angry label
+    The information to see whether a person is extracted from the csv file. If the identification of the angry labels (AU4,AU5,AU15 and AU17) is above a certain threshold the
+    label for happy and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For angry we use label twelve
+    Params: the content of the row in the csv file
+    """
     baseline = 18
     #disgust = ["AU4", "AU15", "AU17"]
     #sadness = ["AU2", "AU4", "AU15", "AU17"]
@@ -80,7 +97,12 @@ def check_angry(content):
             #    print 'emotion & label',emotion_time, label
   
 def check_disgust(content):
-    
+     """
+    The check_disgust function is used to check for which time a person is disgusted and store the time and disgust label
+    The information to see whether a person is extracted from the csv file. If the identification of the disgust labels (AU4,AU15,AU17) a person has is above a certain threshold the
+    label for disgust and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For disgust we use label thirteen
+    Params: the content of the row in the csv file
+    """
     baseline = 25
     disgust = ["AU4", "AU15", "AU17"] 
     label = 13 # 159
@@ -102,6 +124,12 @@ def check_disgust(content):
 
 
 def check_sadness(content):
+    """
+    The check_sadness function is used to check for which time a person is sad and store the time and sad label
+    The information to see whether a person is extracted from the csv file. If the identification of the sad labels (AU2, AU4,AU15,AU17) a person has is above a certain threshold the
+    label for sad and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For sad we use label thirteen
+    Params: the content of the row in the csv file
+    """
     baseline = 18
     sadness = ["AU2", "AU4", "AU15", "AU17"]
     
@@ -125,6 +153,12 @@ def check_sadness(content):
 
 
 def check_contempt(content):
+    """
+    The check_contempt function is used to check for which time a person is contempt and store the time and contempt label
+    The information to see whether a person is extracted from the csv file. If the identification of the AU14 label is above a certain threshold the
+    label and the time are returned. We store the labels in numbers, so we can easier use them when calculating. For contempt we use label eight
+    Params: the content of the row in the csv file
+    """
     baseline = 50
     contempt = ["AU14"]
     label = 8
@@ -180,6 +214,12 @@ def check_happiness(content):
                 return emotion_time, label
 
 def check_nonHappiness(content):
+    """
+    The check_nonHapiness function is used to see if a person is not happy.
+    A person is not happy, when there is no smile and the AU12 baseline is less than 20
+    For the nonHapiness we use the label 50
+    Params: the content of the row in the csv file
+    """
     baseline = 0
     happiness = ["Smile"]
     AU12baseline = 20
@@ -199,6 +239,8 @@ def check_nonHappiness(content):
 
 def get_content(header, row):
     """
+    The get_content function returns the content of the csv file on the specific row
+    Params, the header to append the data to, the row number for which the content is wanted. 
     return: time frames for each AU in video
     """
     # print 'row',row
@@ -211,6 +253,11 @@ def get_content(header, row):
     return result
 
 def get_header_au(row):
+      """
+    Function to return the information for this row
+    param: The specific row with the information
+    return: The time, if a person is smiling, and all the AU gestures
+    """
     rules = ["Time", "Smile", "AU"]
     #header = row[0:2]
     header=row
@@ -227,6 +274,21 @@ def get_header_au(row):
     return result
 
 def process_video_happiness(csv_path, video_path, dest_path, suffix):
+    """
+    we walk through the directory and read the csv file for every video
+    then for every row in the csv file we first get the header information, so the time, the smile and the au labels
+    We then get the content for each row. For that content we then check for the emotion e.g. happy or sad.
+    We then generate a frame for each of these emotions. 
+    If the emotion continues for a longer time period e.g. 2 seconds then we can take multiple frames pictures.
+    There can be a maximum of 14 frames per second taken
+    This function calls the functions:
+    get_header_au
+    get_content
+    check_happiness or check nonHappiness
+    generate_frame
+    change_to_video_name
+    params: the csv_path, the video path that needs to be given for generating the frame, the destination path for the pictures, the suffix for the video in this case flv.
+    """
     for root, dirs, files in os.walk(csv_path, True):
         for name in files:
             with open(os.path.join(root, name), 'rU') as csvfile:
@@ -263,6 +325,21 @@ def process_video_happiness(csv_path, video_path, dest_path, suffix):
                                     generate_frame(video_path, change_to_video_name(name, suffix), emotion[0], emotion[1], dest_path, td)
                                         
 def process_video_non_happiness(csv_path, video_path, dest_path, suffix):
+    """
+    we walk through the directory and read the csv file for every video
+    then for every row in the csv file we first get the header information, so the time, the smile and the au labels
+    We then get the content for each row. For that content we then check for the emotion e.g. happy or sad.
+    We then generate a frame for each of these emotions. 
+    If the emotion continues for a longer time period e.g. 2 seconds then we can take multiple frames pictures.
+    There can be a maximum of 14 frames per second taken
+    This function calls the functions:
+    get_header_au
+    get_content
+    check_happiness or check nonHappiness
+    generate_frame
+    change_to_video_name
+    params: the csv_path, the video path that needs to be given for generating the frame, the destination path for the pictures, the suffix for the video in this case flv.
+    """
     for root, dirs, files in os.walk(csv_path, True):
         for name in files:
             with open(os.path.join(root, name), 'rU') as csvfile:
@@ -303,6 +380,21 @@ def process_video_non_happiness(csv_path, video_path, dest_path, suffix):
                                         change_to_video_name(name, suffix), emotion[0], emotion[1], dest_path,td) 
                                         
 def process_video(csv_path, video_path, dest_path, suffix):
+    """
+    we walk through the directory and read the csv file for every video
+    then for every row in the csv file we first get the header information, so the time, the smile and the au labels
+    We then get the content for each row. For that content we then check for the emotion e.g. happy or sad.
+    We then generate a frame for each of these emotions. 
+    If the emotion continues for a longer time period e.g. 2 seconds then we can take multiple frames pictures.
+    There can be a maximum of 14 frames per second taken
+    This function calls the functions:
+    get_header_au
+    get_content
+    check_happiness or check nonHappiness
+    generate_frame
+    change_to_video_name
+    params: the csv_path, the video path that needs to be given for generating the frame, the destination path for the pictures, the suffix for the video in this case flv.
+    """
     for root, dirs, files in os.walk(csv_path, True):
         for name in files:
             with open(os.path.join(root, name), 'rU') as csvfile:
@@ -345,6 +437,10 @@ def process_video(csv_path, video_path, dest_path, suffix):
                                
 
 def main(argv=None): # pylint: disable=unused-argument
+"""
+the main function initiates the csv path, the video path, the suffic and the destination path
+It calls the process_video_happiness or process_video_nonHapiness
+"""
     csv_path = "AMFED/AMFED/AU_Labels"
     video_path = "AMFED/AMFED/Videos_FLV"
     #destination path for hapiness

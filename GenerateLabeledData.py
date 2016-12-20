@@ -213,6 +213,21 @@ def process_video_happiness(csv_path, video_path, dest_path, suffix):
                                         change_to_video_name(name, suffix), emotion[0], emotion[1], dest_path)
                                         
 def process_video_non_happiness(csv_path, video_path, dest_path, suffix):
+    """
+    we walk through the directory and read the csv file for every video
+    then for every row in the csv file we first get the header information, so the time, the smile and the au labels
+    We then get the content for each row. For that content we then check for the emotion e.g. happy or sad.
+    We then generate a frame for each of these emotions. 
+    If the emotion continues for a longer time period e.g. 2 seconds then we can take multiple frames pictures.
+    There can be a maximum of 14 frames per second taken
+    This function calls the functions:
+    get_header_au
+    get_content
+    check_happiness or check nonHappiness
+    generate_frame
+    change_to_video_name
+    params: the csv_path, the video path that needs to be given for generating the frame, the destination path for the pictures, the suffix for the video in this case flv.
+    """
     for root, dirs, files in os.walk(csv_path, True):
         for name in files:
             with open(os.path.join(root, name), 'rU') as csvfile:
