@@ -65,3 +65,7 @@ Then we iterate in batches through the whole trainingSet. Each batch get's train
 The results are then plotted in Graphs to visualize the accuracy and loss of the testingSet and the trainingSet
 
 ### GenerateLabeledDataMoreFrames
+The GenerateLabeledDataMoreFrames generates from videos with a corresponding csv file labeleled frames.
+These labeled frames are labeled by emotion, for example Happy, non Happy, Sad, Contempt, Angry
+To do this the most important function of this script is being called. This function is called process_video.
+Here, we walk through the directory and read the csv file for every video then for every row in the csv file we first get the header information, so the time, the smile and the au labels. We then get the content for each row. For that content we then check for the emotion e.g. happy or sad. We then generate a frame for each of these emotions. If the emotion continues for a longer time period e.g. 2 seconds then we can take multiple frames pictures. There can be a maximum of 14 frames per second taken

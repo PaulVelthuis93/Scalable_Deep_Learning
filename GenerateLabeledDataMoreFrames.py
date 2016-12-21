@@ -4,17 +4,19 @@ import cv2 #to generate images from the video
 import os #to get file paths
 #adapted from github: https://github.com/dllatas/deepLearning/blob/master/helper/generate_frame_from_video.py
 """
-1 (e) Angry
-- AU 4+5+15+17,
-2 (f) Contempt - AU 14,
-3 (a) Disgust - AU 1+4+15+17,
-4 (d) Fear
-- AU 1+4+7+20,
-5 (b) Happy
-- AU 6+12+25,
-6 (g) Sadness - AU 1+2+4+15+17
-7 (c) Surprise - AU 1+2+5+25+27
-SURPRISE AND FEAR GG
+1 Angry - AU 4+5+15+17,
+2 Contempt - AU 14,
+3 Disgust - AU 1+4+15+17,
+4 Fear - AU 1+4+7+20,
+5 Happy - AU 6+12+25,
+6 Sadness - AU 1+2+4+15+17
+
+The GenerateLabeledDataMoreFrames generates from videos with a corresponding csv file labeleled frames.
+These labeled frames are labeled by emotion, for example Happy, non Happy, Sad, Contempt, Angry
+To do this the most important function of this script is being called. This function is called process_video.
+Here, we walk through the directory and read the csv file for every video then for every row in the csv file we first get the header information, so the time, the smile and the au labels
+We then get the content for each row. For that content we then check for the emotion e.g. happy or sad. We then generate a frame for each of these emotions. 
+If the emotion continues for a longer time period e.g. 2 seconds then we can take multiple frames pictures. There can be a maximum of 14 frames per second taken
 """
 
 def change_to_video_name(csv_name, suffix):
