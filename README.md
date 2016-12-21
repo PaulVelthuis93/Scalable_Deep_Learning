@@ -41,7 +41,14 @@ We use the Python Image Library (PIL) to extract the information from an image. 
 ```bash
 $ sudo apt-get install python-imaging
 ```
-
+We make a numpy array of the pixels to analyse the images , so it is also required. Usage for numpy is available at the following link: https://www.scipy.org/install.html
+Numpy can be installed with the following command:
+```bash
+$ sudo apt-get install python-numpy
+```
+## Steps taken
+1. To start with analysing the videos, we first take the image from the videos. The videos contain a CSV file which contains information about which gestures were shown at which moment in time. So we can extract labelled images with for example the information whether the person is smiling or not. Thus our first step is to extract the labeled images from the videos.
+2. Next, analyses of the images was rendered using Tensorflow. In the coding section, we explain more about how our Tensorflow algorithm works. 
 
 
 
