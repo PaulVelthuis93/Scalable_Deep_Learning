@@ -50,5 +50,18 @@ $ sudo apt-get install python-numpy
 1. To start with analysing the videos, we first take the image from the videos. The videos contain a CSV file which contains information about which gestures were shown at which moment in time. So we can extract labelled images with for example the information whether the person is smiling or not. Thus our first step is to extract the labeled images from the videos.
 2. Next, analyses of the images was rendered using Tensorflow. In the coding section, we explain more about how our Tensorflow algorithm works. 
 
+## Code Files
+### TensorFlowModelClassifySadOrHappy
+This programming model is used to classify sad or happy phases. 
+To achieve this labelled pictures are loaded into our model. 
+These are then transformed into Numpy array dataSet with their labels accordingly. So we get a TrainingSet and a TestingSet
+After the testingSet and TrainingSet are created with their sets of labels as well, the TensorFlowModel is executed.
+In the tensorflow model the actual learning process starts to happen. 
+We have a placeholder for the numpy images and a placeholder for the labels.
+We use a convolutional layer, a max pooling layer and we use a Dropout function in the end. 
+Then we apply Softmax and cross entropy
+We use the adamOptimizer to learn with a certain learning rate and we minimize with the cross entropy which is
+Then we iterate in batches through the whole trainingSet. Each batch get's trained and there is a test batch.
+The results are then plotted in Graphs to visualize the accuracy and loss of the testingSet and the trainingSet
 
 
