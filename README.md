@@ -12,7 +12,9 @@ Tensorflow (latest version 0.12) is an open source library released by Google. T
 Tensorflow requires Python 2.7 or higher to run. Since Python 2.7 is widely supported we decided to use Python 2.7.
 Setup Python 2.7 Linux:
 On Linux python is often pre-installed, with the following command, you can see which version you have:
-
+```bash
+$ python --version  #When reading such code you always type the text after the $ in your terminal 
+```
 
 
 
