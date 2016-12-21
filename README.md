@@ -15,6 +15,33 @@ On Linux python is often pre-installed, with the following command, you can see 
 ```bash
 $ python --version  #When reading such code you always type the text after the $ in your terminal 
 ```
+If Python is not installed: 
+```bash
+$ sudo apt-get install python2.7
+```
+To install Tensorflow there are installation guidelines to be found in the following link:
+https://www.tensorflow.org/get_started/os_setup
+In order to install Tensorflow the pip package management system of python needs to be installed. If not then there you can install it on linux with:
+```bash
+$ sudo apt-get install python-pip python-dev
+```
+Tensorflow performs better on the GPU than the CPU. To install version 0.12 the current latest version on a computer or laptop without GPU you type:
+```bash
+$ export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.12.0rc1-cp27-none-linux_x86_64.whl
+```
+If you have a GPU on your computer or laptop you install with the following command:
+```bash
+$ export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-0.12.0rc1-cp27-none-linux_x86_64.whl
+```
+Tensorflow can only operate on image data, for this reason we need to extract the images from the videos. For this we use OpenCV (Version 2.4.9.1), with which it is possible to capture the image from a certain time in the video. To install OpenCV type:
+```bash
+$ sudo apt-get install python-opencv
+```
+We use the Python Image Library (PIL) to extract the information from an image. To install the PIL library:
+```bash
+$ sudo apt-get install python-imaging
+```
+
 
 
 
